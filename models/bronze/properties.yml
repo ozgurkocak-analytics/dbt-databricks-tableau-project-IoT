@@ -1,0 +1,59 @@
+version: 2
+
+models:
+  # --- STAGING LAYER ---
+  - name: stg_device_telemetry
+    description: "Staging model with 6-minute frequency telemetry data. Source: Delta Lake Raw."
+    columns:
+      - name: device_id
+        tests:
+          - not_null
+      - name: recorded_at
+        tests:
+          - not_null
+      - name: battery_level
+        description: "Battery percentage (0-100)."
+      - name: connection_status
+        tests:
+          - accepted_values:
+              values: ['strong', 'weak']
+
+  # --- SILVER LAYER ---
+  - name: int_device_activity
+    description: "Intermediate model calculating geofence status (Inside/Outside) and activity types."
+    columns:
+      - name: zone_status
+        tests:
+          - accepted_values:
+              values: ['Inside', 'Outside']
+      - name: activity_type
+        tests:
+          - accepted_values:
+              values: ['Stationary', 'Moderate Activity', 'High Intensity']
+
+  # --- GOLD LAYER: FACT ---
+  - name: fct_daily_device_metrics
+    description: "Daily aggregated metrics. Each record represents one device per day."
+    columns:
+      - name: total_active_minutes
+        description: "Calculated as count of active pings * 6 minutes."
+      - name: daily_activity_ratio_pct
+        tests:
+          - dbt_utils.accepted_range: # Opsiyonel: dbt-utils paketi varsa
+              min_value: 0
+              max_value: 100
+
+  # --- GOLD LAYER: DIMENSION ---
+  - name: dim_device_risk_profile
+    description: "Master dimension for device health. Categorizes devices based on battery, safety, and signal."
+    columns:
+      - name: operational_status
+        tests:
+          - accepted_values:
+              values: [
+                'HEALTHY', 
+                'MAINTENANCE: Low Battery', 
+                'SECURITY: Outside Zone', 
+                'CRITICAL: Multi-Risk', 
+                'ACTION REQUIRED'
+              ]

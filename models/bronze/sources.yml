@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: iot_raw_data
+    database: devicedata_dbt_databricks_tableau   # catalog
+    schema: raw
+
+    tables:
+      - name: device_telemetry
+        description: "Raw telemetry data from wearable IoT devices."
