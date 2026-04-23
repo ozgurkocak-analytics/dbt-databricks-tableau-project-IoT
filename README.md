@@ -1,7 +1,3 @@
-Tamamdır, görselleri senin `images/` klasöründeki dosya isimlerinle güncelleyerek ve son notları ekleyerek **README.md** dosyasını nihai haline getirdim:
-
------
-
 # IoT Asset Monitoring & Risk Assessment (dbt + Databricks + Tableau)
 
 ## Overview
